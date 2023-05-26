@@ -27,7 +27,7 @@ jobs:
       - name: List files
         run: ls -l
       - name: Test each tool in turn
-        run: bash ./scripts/check-tools-exist/sh ${{ inputs.tools-to-check }}
+        run: bash ./scripts/check-tools-exist.sh ${{ inputs.tools-to-check }}
       - name: Report results via Slack
         uses: slackapi/slack-github-action@v1.24.0
         if: ${{ failure() }}
