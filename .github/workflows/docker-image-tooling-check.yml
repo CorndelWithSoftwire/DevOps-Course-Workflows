@@ -1,0 +1,37 @@
+name: Check required tools exist in Docker image
+on:
+  workflow_call:
+    inputs:
+      docker-image:
+        description: "The Docker image to be tested for the tools"
+        required: true
+        type: string
+      tools-to-check:
+        description: "A space-separated list of tools to check exist. If specific versions are required, use tool@version syntax"
+        required: true
+        type: string
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: true
+      
+jobs:
+  check-image-has-required-tooling:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: ${{ inputs.docker-image }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: 'CorndelWithSoftwire/DevOps-Course-Workflows'
+      - name: List files
+        run: ls -l
+      - name: Test each tool in turn
+        run: bash ./scripts/check-tools-exist/sh ${{ inputs.tools-to-check }}
+      - name: Report results via Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        if: ${{ failure() }}
+        with:
+          slack-message: "${{ github.repository }} is reporting issues: $DOCKER_IMAGE doesn't contain the necessary tooling"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
